@@ -1,7 +1,5 @@
-FROM python:3 :latest
-ADD requiremets.txt /
-RUN pip install -r /requirements.txt
-ADD main.py /main.py
-ADD spartan.py /spartan.py
-ADD database.py/database.py
+FROM python:3 
+ADD app /app
+WORKDIR /app  
+RUN pip install -r requirements.txt
 ENTRYPOINT ["python", "main.py"]
