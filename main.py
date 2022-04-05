@@ -5,21 +5,6 @@ from bson import json_util
 import json
 import time
 
-with open("database.config") as config_file:
-    database_url = config_file.read().strip()
-
-print(f"DB URL: {database_url}")
-
-while True:
-    try:
-        client = MongoClient("mongodb://db.surabhi.devops106:27017")
-        break
-    except Exception as e:
-        print("Trying to create a connection to th edatabase")
-        time.sleep(2)
-
-db = client.spartans
-
 app = Flask(__name__)
 spartan_management = SpartanManagement()
 

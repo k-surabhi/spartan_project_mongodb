@@ -1,11 +1,13 @@
 import json
 from spartan import Spartan
-from database import Database
+from pymongo import MongoClient
+
 
 class SpartanManagement:
     DATA_FILE_NAME = "data.json"
     DATA_FILE_READ_MODE = "r"
     DATA_FILE_WRITE_MODE = "w+"
+    db=""
 
     Spartan_Trainees_Dict = {}
 
@@ -15,6 +17,16 @@ class SpartanManagement:
                 self.Spartan_Trainees_Dict = json.load(data_file)
         except:
             pass
+
+
+        try:
+            self.client = MongoClient("mongodb://10.1.0.4:27017")
+            self.db = self.client.spartandb
+        except Exception as e:
+            print("trying to create a connection to the database")
+
+        
+        print("hello")
         
     def add_trainee(self, id, f_name, l_name, b_year, b_month, b_day, course, stream):
 
@@ -29,10 +41,11 @@ class SpartanManagement:
             s.course = course
             s.stream = stream
 
-            self.Spartan_Trainees_Dict[id] = s
+            self.Spartan_Trainees_Dict = s.__dict__
 
-            #self.__update_json()
-            Database.insert(id, self.Spartan_Trainees_Dict)
+            self.__update_json()
+            self.db.employees.insert_one(self.Spartan_Trainees_Dict)
+            #Database.insert(id, self.Spartan_Trainees_Dict)
             return "SUCCESS"
 
         except Exception as ex:
@@ -42,11 +55,12 @@ class SpartanManagement:
     def remove_trainee(self, id):
 
         try:
-            self.Spartan_Trainees_Dict.pop(id, None)
-
-            self.__update_json()
+            #self.Spartan_Trainees_Dict.pop(id, None)
+            #self.__update_json()
+            if not self.db.employees.find_one({"spartan_id": id}):
+                    return "Error, ID not in database"
+            self.db.employees.delete_one({"spartan_id" : id})
             return "SUCCESS"
-
         except Exception as ex:
             print(str(ex))
             return str(ex)
@@ -68,7 +82,13 @@ class SpartanManagement:
     def get_trainees(self):
 
         try:
-            return list(self.Spartan_Trainees_Dict.values())
+            #return list(self.Spartan_Trainees_Dict.values())
+            documents = self.db.employees.find()
+            response_list = []
+            for document in documents:
+                document['_id'] = str(document['_id'])
+                response_list.append(document)
+            return json.dumps(response_list)
         except Exception as ex:
             print(str(ex))
             return str(ex)
