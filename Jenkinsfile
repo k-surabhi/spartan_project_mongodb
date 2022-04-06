@@ -16,5 +16,15 @@ pipeline {
         }
       }
     }
+
+    stage('push to docker hub'){
+      steps {
+        script {
+          docker.withRegistry('', 'docker_hub_crec'){
+            DOCKER_IMAGE.push()
+          }
+        }
+      }
+    }
   }
 }
