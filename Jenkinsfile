@@ -4,6 +4,7 @@ pipeline {
 
   environment {
     IMAGE_NAME = "ksurabhi7/rest_mongo:1." + "$BUILD_NUMBER"
+    DOCKER_CREDENTIALS = 'docker_hub_crec'
 
   }
 
@@ -26,7 +27,7 @@ pipeline {
     stage('push to docker hub'){
       steps {
         script {
-          docker.withRegistry('', 'docker_hub_crec'){
+          docker.withRegistry('', DOCKER_CREDENTIALS){
             DOCKER_IMAGE.push()
           }
         }
