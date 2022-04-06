@@ -29,6 +29,23 @@ pipeline {
       }
     }
 
+    stage('Testing the Code'){
+      steps{
+        script {
+         sh '''
+          docker run --rm -v $PWD/test-results:/reports --workdir /app $IMAGE_NAME python -m pytest -v --junitxml=/reports/results.xml
+          ls $PWD/test-results
+        '''
+       }
+      }
+
+      post {
+       always {
+        junit testResults: '**/test-results/*.xml'
+       }
+     }
+    }
+
     stage('push to docker hub'){
       steps {
         script {
