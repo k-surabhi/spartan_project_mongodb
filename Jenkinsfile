@@ -12,7 +12,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          docker.build 'ksurabhi7/rest_mongo'
+          DOCKER_IMAGE = docker.build 'ksurabhi7/rest_mongo'
         }
       }
     }
