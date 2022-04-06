@@ -1,6 +1,12 @@
 pipeline {
   agent any
 
+
+  environment {
+    IMAGE_NAME = "ksurabhi7/rest_mongo:1." + "$BUILD_NUMBER"
+
+  }
+
   stages {
     stage('clone project from GitHub'){
       steps {
@@ -12,7 +18,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          DOCKER_IMAGE = docker.build 'ksurabhi7/rest_mongo'
+          DOCKER_IMAGE = docker.build IMAGE_NAME
         }
       }
     }
