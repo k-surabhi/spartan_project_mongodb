@@ -9,10 +9,15 @@ pipeline {
   }
 
   stages {
-    stage('clone project from GitHub'){
+    stage('Cloning the project from GitHub'){
       steps {
-        git branch: 'main',
-        url: 'https://github.com/k-surabhi/spartan_project_mongodb.git'
+        checkout([
+            $class: 'GitSCM', branches: [[name: '*/main']],
+            serRemoteConfigs: [[
+              url: 'git@github.com:oabu-sg/rest_mongo.git',
+              credentialsId: 'ssh_git_cred'
+            ]]
+          ])
       }
     }
 
