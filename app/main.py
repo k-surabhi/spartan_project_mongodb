@@ -4,13 +4,15 @@ from pymongo import MongoClient
 from bson import json_util
 import json
 import time
+import random
 
+server_id = random.randinit(1000, 9999)
 app = Flask(__name__)
 spartan_management = SpartanManagement()
 
 @app.route('/', methods=["GET"])
 def home_page():
-    return "Sparta-Trainee Management System"
+    return f"Sparta-Trainee Management System: {server_id}"
 
 
 @app.route('/spartan/add', methods = ['POST'])
