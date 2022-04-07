@@ -73,6 +73,15 @@ resource "aws_network_acl" "devops106_terraform_surabhi_nacl_public_tf"{
     action = "allow"
   }
 
+  ingress{
+    rule_no = 300
+    from_port = 80
+    to_port = 80
+    cidr_block = "0.0.0.0/0"
+    protocol = "tcp"
+    action = "allow"
+  }
+
   egress {
     rule_no = 10000
     from_port = 1024
@@ -102,6 +111,15 @@ resource "aws_security_group" "devops106_terraform_surabhi_sg_webserver_tf"{
     to_port = 8080
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress{
+    rule_no = 300
+    from_port = 80
+    to_port = 80
+    cidr_block = "0.0.0.0/0"
+    protocol = "tcp"
+    action = "allow"
   }
 
 
@@ -138,7 +156,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   #Name = "devops106_terraform_surabhi_webserver"
   #}
 
-  count = 1
+  count = 3
   user_data = data.template_file.app_init.rendered
 
   tags = {
@@ -187,7 +205,19 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
 
 
   }
+######################################################################################
 
+resource "aws_instance" "devops106_terraform_surabhi_proxy_webserver_tf"{
+  ami = var.ubuntu_20_04_ami_id
+  instance_type = "t2.micro"
+  key_name = "devops106_skumari"
+  vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
+
+  subnet_id = aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id
+  associate_public_ip_address = true
+  tags = {
+  Name = "devops106_terraform_surabhi_proxy"
+  }
 
 
 

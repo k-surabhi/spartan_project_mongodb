@@ -14,5 +14,5 @@ $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo usermod -a -G docker ubuntu
-sudo docker pull ksurabhi7/sparta-api-mongodb:2.0
-sudo docker run -dt -p 8080:8080 ksurabhi7/sparta-api-mongodb:2.0
+sudo docker pull ksurabhi7/spartan_project_mongodb:4
+sudo docker run -dt -p 8080:8080 ksurabhi7/spartan_project_mongodb:4
