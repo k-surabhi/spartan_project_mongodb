@@ -478,7 +478,7 @@ resource "aws_route53_record" "devops106_terraform_surabhi_dns_db_tf" {
 
 
 
-resource "aws_lb" "devops_terraform_surabhi_lb_tf" {
+resource "aws_lb" "devops106_terraform_surabhi_lb_tf" {
   name = "devops106terraformsurabhi-lb"
   internal = false
   load_balancer_type = "application"
@@ -491,7 +491,7 @@ resource "aws_lb" "devops_terraform_surabhi_lb_tf" {
 }
 
 
-resource "aws_alb_targer_group" "devops106_terraform_surabhi_tg_tf"{
+resource "aws_alb_target_group" "devops106_terraform_surabhi_tg_tf"{
   name = "devops106terraformsurabhi-lb"
   port = 8080
   target_type = "instance"
@@ -506,7 +506,7 @@ resource "aws_alb_target_group_attachment" "devops106_terraform_surabhi_tg_attac
 }
 
 resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
-  load_balancer_arn = aws.lb.devops106_terraform_surabhi_lb_tf.arn
+  load_balancer_arn = aws_lb.devops106_terraform_surabhi_lb_tf.arn
   port = 80
   protocol = "HTTP"
 
