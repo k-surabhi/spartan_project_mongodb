@@ -4,9 +4,15 @@ variable "privat_key_path_var" {
 }
 
 
-variable "ubuntu_20_04_ami_id" {
+variable "devops106_surabhi_example_image_AMI" {
   default = "ami-08ca3fed11864d6bb"
 }
+
+variable "" {
+  default = "ami-034f3e47a4b4cc26a"
+}
+
+
 
 
 variable "public_key_name_var" {

@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+sudo rm /etc/nginx/sites-available/default
+sudo rm /etc/nginx/sites-enabled/default
+sudo tee -a /etc/nginx/sites-available/spartan > /dev/null <<EOT
 file="upstream spartan_server{
         server {IP0}:8080
 	      server {IP1}:8080
@@ -14,5 +17,9 @@ server{
             proxy_pass http://spartan_server;
 				}
 }"
+EOT
+sudo ln -s /etc/nginx/sites-available/spartan /etc/nginx/sites-enabled/spartan
 
-echo $file > ../init-scripts/spartan_api
+
+
+#echo $file > ../init-scripts/spartan_api

@@ -154,7 +154,7 @@ data "template_file" "app_init" {
 
 
 resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
-  ami = var.ubuntu_20_04_ami_id
+  ami = var.devops106_surabhi_example_image_AMI
   instance_type = "t2.micro"
   key_name = "devops106_skumari"
   vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
@@ -165,7 +165,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   #Name = "devops106_terraform_surabhi_webserver"
   #}
 
-  count = 2
+  count = 3
   user_data = data.template_file.app_init.rendered
 
   tags = {
@@ -213,45 +213,51 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   #}
 
 }
+################################################################################################
+/*ta "template_file" "proxy_init" {
+  template = file("../init-scripts/spartan_api.tpl")
+  vars = {
+    IP0 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
+    IP1 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
+    IP2 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
+  }
+}
+'''/
+*/
+data "template_file" "ngnix_init" {
+  template = file("../init-scripts/ngnix.sh")
+  vars = {
+    IP0 = aws_instance.devops106_terraform_surabhi_webserver_tf[0].public_ip
+    IP1 = aws_instance.devops106_terraform_surabhi_webserver_tf[1].public_ip
+    IP2 = aws_instance.devops106_terraform_surabhi_webserver_tf[2].public_ip
+  }
+}
 
-#data "template_file" "proxy_init" {
-  #template = file("../init-scripts/spartan_api.tpl")
-  #vars = {
-    #IP0 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
-    #IP1 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
-    #IP2 = value = aws_instance.devops106_terraform_surabhi_database_tf[0].public_ip
-  #}
-#}
-#'''/
-#data "template_file" "app3_init" {
-#  template = file("../init-scripts/ngnix.sh")
-#}
-#
-#resource "aws_instance" "devops106_terraform_surabhi_proxy_webserver_tf"{
-#  ami = var.ubuntu_20_04_ami_id
-#  instance_type = "t2.micro"
-#  key_name = "devops106_skumari"
-#  vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
+resource "aws_instance" "devops106_terraform_surabhi_proxy_webserver_tf"{
+  ami = var.devops106_surabhi_example_image_AMI
+  instance_type = "t2.micro"
+  key_name = "devops106_skumari"
+  vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
 
-#  subnet_id = aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id
-#  associate_public_ip_address = true
-#  user_data = data.template_file.app3_init.rendered
-#  tags = {
-#  Name = "devops106_terraform_surabhi_proxy"
-#  }
+  subnet_id = aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id
+  associate_public_ip_address = true
+  user_data = data.template_file.app3_init.rendered
+  tags = {
+  Name = "devops106_terraform_surabhi_proxy"
+  }
 
-#  connection {
-#  type = "ssh"
-#  user = "ubuntu"
-#  host = self.public_ip
-#  private_key = file(var.privat_key_path_var)
-#  }
-#}
+  connection {
+  type = "ssh"
+  user = "ubuntu"
+  host = self.public_ip
+  private_key = file(var.privat_key_path_var)
+  }
+}
 
 
 
 ######################################################################################
-
+/*
 resource "aws_subnet" "devops106_terraform_surabhi_subnet_webserver2_tf"{
   vpc_id = local.vpc_id_var
   cidr_block = "10.11.3.0/24"
@@ -292,7 +298,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver2_tf"{
 
 
 }
-
+*/
 
 #############################instanace for mongo db###########################################################
 
@@ -421,7 +427,7 @@ data "template_file" "app2_init" {
 
 
 resource "aws_instance" "devops106_terraform_surabhi_database_tf" {
-ami = var.ubuntu_20_04_ami_id
+ami = var.devops106_surabhi_example_image_AMI
 instance_type = "t2.micro"
 key_name = var.public_key_name_var
 vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_database_tf.id]
@@ -477,7 +483,15 @@ resource "aws_route53_record" "devops106_terraform_surabhi_dns_db_tf" {
 }
 
 
+resource "aws_route53_record" "devops106_terraform_surabhi_dns_webservers_tf" {
+  zone_id = aws_route53_zone.devops106_terraform_surabhi_dns_zone_tf.zone_id
+  name = "app"
+  type = "A"
+  ttl = "30"
+  records = aws_instance.devops106_terraform_surabhi_webserver_tf[*].private_ip
+}
 
+/*
 resource "aws_lb" "devops106_terraform_surabhi_lb_tf" {
   name = "devops106terraformsurabhi-lb"
   internal = false
@@ -505,6 +519,12 @@ resource "aws_alb_target_group_attachment" "devops106_terraform_surabhi_tg_attac
   target_id = aws_instance.devops106_terraform_surabhi_webserver_tf[count.index].id
 }
 
+resource "aws_alb_target_group_attachment" "devops106_terraform_surabhi_tg_attach_2_tf" {
+  target_group_arn = aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn
+  count = length(aws_instance.devops106_terraform_surabhi_webserver2_tf)
+  target_id = aws_instance.devops106_terraform_surabhi_webserver2_tf[count.index].id
+}
+
 resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
   load_balancer_arn = aws_lb.devops106_terraform_surabhi_lb_tf.arn
   port = 80
@@ -515,3 +535,4 @@ resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
     target_group_arn = aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn
   }
 }
+*/
