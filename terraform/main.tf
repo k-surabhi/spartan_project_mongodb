@@ -269,7 +269,7 @@ resource "aws_subnet" "devops106_terraform_surabhi_subnet_webserver2_tf"{
 }
 
 resource "aws_instance" "devops106_terraform_surabhi_webserver2_tf"{
-  ami = var.ubuntu_20_04_ami_id
+  ami = var.devops106_surabhi_example_image_AMI
   instance_type = "t2.micro"
   key_name = "devops106_skumari"
   vpc_security_group_ids = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
@@ -298,7 +298,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver2_tf"{
 
 
 }
-*/
+
 
 #############################instanace for mongo db###########################################################
 
