@@ -49,6 +49,7 @@ resource "aws_route_table" "devops106_terraform_surabhi_rt_public_tf"{
 }
 
 
+
 resource "aws_route_table_association" "devops106_terraform_surabhi_rt_assoc_public_web_tf"{
   subnet_id = aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id
 
@@ -152,7 +153,7 @@ data "template_file" "app_init" {
 }
 
 
-
+/*
 resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   ami = var.devops106_surabhi_example_image_AMI
   instance_type = "t2.micro"
@@ -213,6 +214,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   #}
 
 }
+*/
 ################################################################################################
 /*ta "template_file" "proxy_init" {
   template = file("../init-scripts/spartan_api.tpl")
@@ -267,7 +269,7 @@ resource "aws_subnet" "devops106_terraform_surabhi_subnet_webserver2_tf"{
   }
 
 }
-
+/*
 resource "aws_instance" "devops106_terraform_surabhi_webserver2_tf"{
   ami = var.devops106_surabhi_example_image_AMI
   instance_type = "t2.micro"
@@ -298,7 +300,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver2_tf"{
 
 
 }
-
+*/
 
 #############################instanace for mongo db###########################################################
 
@@ -482,7 +484,7 @@ resource "aws_route53_record" "devops106_terraform_surabhi_dns_db_tf" {
   records = [aws_instance.devops106_terraform_surabhi_database_tf.public_ip]
 }
 
-
+/*
 resource "aws_route53_record" "devops106_terraform_surabhi_dns_webservers_tf" {
   zone_id = aws_route53_zone.devops106_terraform_surabhi_dns_zone_tf.zone_id
   name = "app"
@@ -490,7 +492,7 @@ resource "aws_route53_record" "devops106_terraform_surabhi_dns_webservers_tf" {
   ttl = "30"
   records = aws_instance.devops106_terraform_surabhi_webserver_tf[*].private_ip
 }
-
+*/
 
 resource "aws_lb" "devops106_terraform_surabhi_lb_tf" {
   name = "devops106terraformsurabhi-lb"
@@ -512,7 +514,7 @@ resource "aws_alb_target_group" "devops106_terraform_surabhi_tg_tf"{
   protocol = "HTTP"
   vpc_id = local.vpc_id_var
 }
-
+/*
 resource "aws_alb_target_group_attachment" "devops106_terraform_surabhi_tg_attach_tf" {
   target_group_arn = aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn
   count = length(aws_instance.devops106_terraform_surabhi_webserver_tf)
@@ -524,7 +526,7 @@ resource "aws_alb_target_group_attachment" "devops106_terraform_surabhi_tg_attac
   count = length(aws_instance.devops106_terraform_surabhi_webserver2_tf)
   target_id = aws_instance.devops106_terraform_surabhi_webserver2_tf[count.index].id
 }
-
+*/
 resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
   load_balancer_arn = aws_lb.devops106_terraform_surabhi_lb_tf.arn
   port = 80
@@ -534,4 +536,71 @@ resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
     type = "forward"
     target_group_arn = aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn
   }
+}
+
+
+resource "aws_autoscaling_group" "devops106_terraform_surabhi_asg_tf" {
+    name = "devops106_terraform_surabhi_asg"
+    health_check_type = "ELB"
+    health_check_grace_period = 120
+    min_size = 1
+    desired_capacity = 2
+    max_size = 5
+    vpc_zone_identifier = [
+      aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id,
+      aws_subnet.devops106_terraform_surabhi_subnet_webserver2_tf.id
+    ]
+    target_group_arns = [aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn]
+    launch_template {
+      id = aws_launch_template.devops106_terraform_surabhi_lt_tf.id
+    }
+    metrics_granularity = "1Minute"
+
+    enabled_metrics = [
+      "GroupMinSize",
+      "GroupMaxSize",
+      "GroupDesiredCapacity",
+      "GroupInServiceInstances",
+      "GroupTotalInstances"
+    ]
+
+}
+
+resource "aws_autoscaling_policy" "devops106_terraform_surabhi_asg_policy_tf" {
+  name = "devops106_terraform_surabhi_asg_policy"
+  autoscaling_group_name = aws_autoscaling_group.devops106_terraform_surabhi_asg_tf.name
+
+  policy_type = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+
+    }
+    target_value = 50.0
+  }
+}
+
+resource "aws_launch_template" "devops106_terraform_surabhi_lt_tf" {
+  name = "devops106_terraform_surabhi_lt"
+  image_id = "ami-034f3e47a4b4cc26a"
+  instance_type = "t2.micro"
+  key_name = var.public_key_name_var
+
+  network_interfaces {
+    associate_public_ip_address = true
+    subnet_id = aws_subnet.devops106_terraform_surabhi_subnet_webserver_tf.id
+    security_groups = [aws_security_group.devops106_terraform_surabhi_sg_webserver_tf.id]
+    delete_on_termination = true
+
+  }
+  user_data = base64encode(data.template_file.app_init.rendered)
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "devops106_terraform_surabhi_webserver"
+    }
+  }
+
+
 }
