@@ -223,7 +223,7 @@ resource "aws_instance" "devops106_terraform_surabhi_webserver_tf"{
   }
 }
 '''/
-*/
+
 data "template_file" "ngnix_init" {
   template = file("../init-scripts/ngnix.sh")
   vars = {
@@ -254,10 +254,10 @@ resource "aws_instance" "devops106_terraform_surabhi_proxy_webserver_tf"{
   }
 }
 
-
+*/
 
 ######################################################################################
-/*
+
 resource "aws_subnet" "devops106_terraform_surabhi_subnet_webserver2_tf"{
   vpc_id = local.vpc_id_var
   cidr_block = "10.11.3.0/24"
@@ -491,7 +491,7 @@ resource "aws_route53_record" "devops106_terraform_surabhi_dns_webservers_tf" {
   records = aws_instance.devops106_terraform_surabhi_webserver_tf[*].private_ip
 }
 
-/*
+
 resource "aws_lb" "devops106_terraform_surabhi_lb_tf" {
   name = "devops106terraformsurabhi-lb"
   internal = false
@@ -535,4 +535,3 @@ resource "aws_alb_listener" "devops106_terraform_surabhi_lb_listener_tf" {
     target_group_arn = aws_alb_target_group.devops106_terraform_surabhi_tg_tf.arn
   }
 }
-*/
